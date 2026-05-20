@@ -149,6 +149,36 @@ describe('#3579: installer deploys graphify hook + lib helper to target', () => 
     assert.ok(fs.existsSync(dest), `expected ${dest} to exist after install`);
   });
 
+  test('hooks/gsd-gitnexus-update.sh present at install target', () => {
+    const dest = path.join(tmpDir, 'hooks', 'gsd-gitnexus-update.sh');
+    assert.ok(fs.existsSync(dest), `expected ${dest} to exist after install`);
+  });
+
+  test('hooks/lib/gsd-gitnexus-rebuild.sh present at install target', () => {
+    const dest = path.join(tmpDir, 'hooks', 'lib', 'gsd-gitnexus-rebuild.sh');
+    assert.ok(fs.existsSync(dest), `expected ${dest} to exist after install`);
+  });
+
+  test('installer registers GitNexus auto-update PostToolUse hook', () => {
+    const settingsPath = path.join(tmpDir, 'settings.json');
+    const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    const postToolUse = settings.hooks && settings.hooks.PostToolUse;
+    assert.ok(Array.isArray(postToolUse), 'expected settings.hooks.PostToolUse array');
+    assert.ok(
+      postToolUse.some((entry) =>
+        entry.matcher === 'Bash' &&
+        Array.isArray(entry.hooks) &&
+        entry.hooks.some((hook) =>
+          hook.type === 'command' &&
+          typeof hook.command === 'string' &&
+          hook.command.includes('gsd-gitnexus-update.sh') &&
+          hook.timeout === 5
+        )
+      ),
+      'expected a Bash PostToolUse command hook for gsd-gitnexus-update.sh'
+    );
+  });
+
   test('installer does not warn about missing gsd-graphify-update.sh', () => {
     assert.ok(
       !installStdout.includes('Missing expected hook: gsd-graphify-update.sh'),
@@ -159,6 +189,19 @@ describe('#3579: installer deploys graphify hook + lib helper to target', () => 
         'Skipped graphify auto-update hook — gsd-graphify-update.sh not found'
       ),
       `installer must not skip graphify hook configuration; got:\n${installStdout}`
+    );
+  });
+
+  test('installer does not warn about missing gsd-gitnexus-update.sh', () => {
+    assert.ok(
+      !installStdout.includes('Missing expected hook: gsd-gitnexus-update.sh'),
+      `installer output must not warn about missing GitNexus hook; got:\n${installStdout}`
+    );
+    assert.ok(
+      !installStdout.includes(
+        'Skipped GitNexus auto-update hook - gsd-gitnexus-update.sh not found'
+      ),
+      `installer must not skip GitNexus hook configuration; got:\n${installStdout}`
     );
   });
 });

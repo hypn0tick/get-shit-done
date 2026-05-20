@@ -32,6 +32,8 @@ const EXPECTED_SH_HOOKS = [
   'gsd-session-state.sh',
   'gsd-validate-commit.sh',
   'gsd-phase-boundary.sh',
+  'gsd-graphify-update.sh',
+  'gsd-gitnexus-update.sh',
 ];
 
 // All hooks that should be in hooks/dist/ after build
@@ -258,6 +260,22 @@ describe('install.js source correctness', () => {
     assert.ok(
       src.includes('Missing expected hook:'),
       'install should warn about missing .sh hooks after verification'
+    );
+  });
+
+  test('hooks/lib helper allowlist includes GitNexus rebuild helper', () => {
+    const allowlistMatch = src.match(/const GSD_HOOK_LIB_FILES\s*=\s*\[([^\]]+)\]/);
+    assert.ok(allowlistMatch, 'GSD_HOOK_LIB_FILES array should exist');
+    assert.ok(
+      allowlistMatch[1].includes('gsd-gitnexus-rebuild.sh'),
+      'GSD_HOOK_LIB_FILES should include gsd-gitnexus-rebuild.sh'
+    );
+  });
+
+  test('Codex shell-hook exclusion documents Graphify and GitNexus', () => {
+    assert.ok(
+      src.includes('gsd-graphify-update.sh') && src.includes('gsd-gitnexus-update.sh'),
+      'Codex shell-hook exclusion should explicitly name Graphify and GitNexus shell hooks'
     );
   });
 });
