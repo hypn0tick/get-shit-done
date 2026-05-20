@@ -91,10 +91,24 @@ describe('#3579 Gap 1 + Gap 2: build-hooks.js populates dist with graphify hook 
     );
   });
 
+  test('hooks/dist/gsd-gitnexus-update.sh exists after build', () => {
+    assert.ok(
+      fs.existsSync(path.join(DIST_DIR, 'gsd-gitnexus-update.sh')),
+      'expected hooks/dist/gsd-gitnexus-update.sh to exist after build'
+    );
+  });
+
   test('hooks/dist/lib/gsd-graphify-rebuild.sh exists after build', () => {
     assert.ok(
       fs.existsSync(path.join(DIST_DIR, 'lib', 'gsd-graphify-rebuild.sh')),
       'expected hooks/dist/lib/gsd-graphify-rebuild.sh to exist after build (Gap 2)'
+    );
+  });
+
+  test('hooks/dist/lib/gsd-gitnexus-rebuild.sh exists after build', () => {
+    assert.ok(
+      fs.existsSync(path.join(DIST_DIR, 'lib', 'gsd-gitnexus-rebuild.sh')),
+      'expected hooks/dist/lib/gsd-gitnexus-rebuild.sh to exist after build'
     );
   });
 });
