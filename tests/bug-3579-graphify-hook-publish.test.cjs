@@ -164,19 +164,25 @@ describe('#3579: installer deploys graphify hook + lib helper to target', () => 
     const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
     const postToolUse = settings.hooks && settings.hooks.PostToolUse;
     assert.ok(Array.isArray(postToolUse), 'expected settings.hooks.PostToolUse array');
-    assert.ok(
-      postToolUse.some((entry) =>
-        entry.matcher === 'Bash' &&
-        Array.isArray(entry.hooks) &&
-        entry.hooks.some((hook) =>
-          hook.type === 'command' &&
-          typeof hook.command === 'string' &&
-          hook.command.includes('gsd-gitnexus-update.sh') &&
-          hook.timeout === 5
-        )
-      ),
-      'expected a Bash PostToolUse command hook for gsd-gitnexus-update.sh'
+    const gitnexusEntry = postToolUse.find((entry) =>
+      Array.isArray(entry.hooks) &&
+      entry.hooks.some((hook) =>
+        hook.type === 'command' &&
+        typeof hook.command === 'string' &&
+        hook.command.includes('gsd-gitnexus-update.sh') &&
+        hook.timeout === 5
+      )
     );
+    assert.ok(gitnexusEntry, 'expected a PostToolUse command hook for gsd-gitnexus-update.sh');
+    for (const toolName of [
+      'Bash',
+      'mcp__gitnexus__query',
+      'mcp__gitnexus__context',
+      'mcp__gitnexus__impact',
+      'mcp__gitnexus__detect_changes',
+    ]) {
+      assert.match(gitnexusEntry.matcher, new RegExp(`(^|\\|)${toolName}(\\||$)`));
+    }
   });
 
   test('installer does not warn about missing gsd-graphify-update.sh', () => {
