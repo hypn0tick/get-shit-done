@@ -272,10 +272,39 @@ describe('install.js source correctness', () => {
     );
   });
 
-  test('Codex shell-hook exclusion documents Graphify and GitNexus', () => {
+  test('Codex shell hooks include Graphify/GitNexus hooks and lib helpers when capabilities pass', () => {
+    const codexBlockStart = src.indexOf('const CODEX_HOOKS_TO_COPY');
+    const codexBlockEnd = src.indexOf('// Add Codex hooks', codexBlockStart);
+    assert.ok(codexBlockStart !== -1 && codexBlockEnd !== -1, 'Codex hook copy block should exist');
+    const codexHookCopyBlock = src.slice(codexBlockStart, codexBlockEnd);
+
     assert.ok(
-      src.includes('gsd-graphify-update.sh') && src.includes('gsd-gitnexus-update.sh'),
-      'Codex shell-hook exclusion should explicitly name Graphify and GitNexus shell hooks'
+      codexHookCopyBlock.includes('gsd-graphify-update.sh'),
+      'Codex hook copy allowlist should include gsd-graphify-update.sh when shell-hook capabilities pass'
+    );
+    assert.ok(
+      codexHookCopyBlock.includes('gsd-gitnexus-update.sh'),
+      'Codex hook copy allowlist should include gsd-gitnexus-update.sh when shell-hook capabilities pass'
+    );
+    assert.ok(
+      codexHookCopyBlock.includes('copyLibDir') || codexHookCopyBlock.includes('GSD_HOOK_LIB_FILES'),
+      'Codex hook copy block should copy hooks/lib helpers for shell hooks'
+    );
+    assert.ok(
+      !codexHookCopyBlock.includes('deliberately do *not* copy'),
+      'Codex hook copy block should no longer document Graphify/GitNexus as excluded shell hooks'
+    );
+  });
+
+  test('Codex shell-hook capability failure path warns and skips shell hooks', () => {
+    const codexBlockStart = src.indexOf('// Copy only the hook files that Codex actually registers');
+    const codexBlockEnd = src.indexOf('if (isCopilot)', codexBlockStart);
+    assert.ok(codexBlockStart !== -1 && codexBlockEnd !== -1, 'Codex install block should exist');
+    const codexInstallBlock = src.slice(codexBlockStart, codexBlockEnd);
+
+    assert.ok(
+      codexInstallBlock.includes('Bash executable path unavailable'),
+      'Codex install should warn and skip Graphify/GitNexus shell hooks when Bash capability checks fail'
     );
   });
 });

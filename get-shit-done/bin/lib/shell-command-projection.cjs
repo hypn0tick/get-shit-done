@@ -125,6 +125,8 @@ const MANAGED_HOOK_COMMAND_BASENAMES_BY_SURFACE = {
   ]),
   'codex-hooks-json': new Set([
     'gsd-check-update.js',
+    'gsd-graphify-update.sh',
+    'gsd-gitnexus-update.sh',
   ]),
 };
 
